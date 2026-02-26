@@ -3,7 +3,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useRef } from "react";
 import axios from "axios";
 import { API } from "../services/api";
-
+import formatINR from "../utils/formatCurrency";
 import { useState, useEffect } from "react";
 import NotificationDropdown from "../components/NotificationDropdown";
 import { 
@@ -35,7 +35,7 @@ const handleFileUpload = async (e) => {
 
   try {
     const token = 
-    localStorage.getItem("access_token") || 
+   // localStorage.getItem("access_token") || 
     localStorage.getItem("token");
 
     await axios.post(
@@ -60,7 +60,7 @@ const handleFileUpload = async (e) => {
 const handleExport = async () => {
   try {
     const token =
-      localStorage.getItem("access_token") ||
+      //localStorage.getItem("access_token") ||
       localStorage.getItem("token");
 
     if (!token) {
@@ -98,9 +98,7 @@ const handleExport = async () => {
   const dashboardStats = [
     { 
       title: "Total Revenue", 
-      //value: "$2,435,890", 
-      value: stats ? `$${stats.total_revenue}` : "$0",
-
+      value: stats ? formatINR(stats.total_revenue) : formatINR(0),
       change: "+12.5%", 
       icon: DollarSign, 
       trend: "up", 
@@ -144,7 +142,8 @@ const handleExport = async () => {
       icon: CheckCircle, 
       trend: "up", 
       color: "orange",
-      subtext: "$890K total value",
+      //subtext: "$890K total value",
+      subtext: "₹8.9L total value",
       chart: [12, 15, 18, 22, 28, 31, 35],
       gradient: "from-orange-500 via-amber-500 to-yellow-500"
     }
@@ -184,7 +183,7 @@ const handleExport = async () => {
 const fetchStats = async () => {
   try {
     const token =
-      localStorage.getItem("access_token") ||
+      //localStorage.getItem("access_token") ||
       localStorage.getItem("token");
 
     const res = await axios.get(
@@ -206,7 +205,7 @@ const fetchStats = async () => {
 const fetchActivities = async () => {
   try {
     const token =
-      localStorage.getItem("access_token") ||
+      //localStorage.getItem("access_token") ||
       localStorage.getItem("token");
 
     const res = await axios.get(
@@ -360,7 +359,7 @@ const fetchActivities = async () => {
 
                    {activity.amount && (
                       <span className="text-sm font-semibold">
-                         ₹{activity.amount}
+                         {formatINR(activity.amount)}
                       </span>
                    )}
                 </div>

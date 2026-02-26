@@ -7,7 +7,7 @@ import {
 } from "recharts";
 import { Card, CardContent } from "../components/ui/Card1";
 import { Loader2, AlertCircle } from "lucide-react";
-
+import formatINR from "../utils/formatCurrency";
 export default function Reports() {
   const [revenueData, setRevenueData] = useState([]);
   const [salesReps, setSalesReps] = useState([]);
@@ -73,7 +73,9 @@ export default function Reports() {
               <BarChart data={revenueData}>
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip
+                  formatter={(value) => formatINR(value)}
+                />
                 <Legend />
                 <Bar dataKey="total_sales" fill="#6366f1" name="Revenue" /> 
                 {/* ✅ fixed to match backend key */}
@@ -94,7 +96,7 @@ export default function Reports() {
                 <li key={idx} className="flex justify-between border-b py-2">
                   <span className="font-medium">{rep.rep_name}</span>
                   <span className="text-indigo-600 font-semibold">
-                    ${rep.total_sales.toLocaleString()}
+                    {formatINR(rep.total_sales)}
                   </span>
                 </li>
               ))}
@@ -123,8 +125,10 @@ export default function Reports() {
                       <Cell key={index} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
-                </PieChart>
+                  <Tooltip
+                    formatter={(value) => formatINR(value)}
+                  />
+                  </PieChart>
               </ResponsiveContainer>
             </div>
           </CardContent>

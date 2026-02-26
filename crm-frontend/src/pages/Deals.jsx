@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Edit, Trash2, DollarSign } from "lucide-react";
 import { toast } from "react-hot-toast";
-
+import formatINR from "../utils/formatCurrency";
 export default function Deals() {
   const [deals, setDeals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -127,7 +127,8 @@ export default function Deals() {
           type="number"
           value={formData.value}
           onChange={handleChange}
-          placeholder="Value"
+          placeholder="Amount (₹)"
+          //placeholder="Value"
           className="border rounded p-2"
         />
         <select name="stage" value={formData.stage} onChange={handleChange} className="border rounded p-2">
@@ -173,7 +174,10 @@ export default function Deals() {
               <div>
                 <h2 className="font-bold text-lg">{deal.title}</h2>
                 <p className="text-sm text-gray-600">{deal.company}</p>
-                <p className="text-green-600 font-semibold">${deal.value}</p>
+                <p className="text-green-600 font-semibold">
+                    {formatINR(deal.value)}
+                </p>
+                
                 <p className="text-sm">Stage: <span className="font-medium">{deal.stage}</span></p>
                 {deal.close_date && <p className="text-sm">Closing: {new Date(deal.close_date).toLocaleDateString()}</p>}
               </div>
