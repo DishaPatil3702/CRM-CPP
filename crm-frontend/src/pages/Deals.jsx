@@ -135,7 +135,7 @@ export default function Deals() {
           <option value="qualified">Qualified</option>
           <option value="proposal">Proposal</option>
           <option value="negotiation">Negotiation</option>
-          <option value="won">Won</option>
+          <option value="won">won</option>
           <option value="lost">Lost</option>
         </select>
         <input

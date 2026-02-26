@@ -13,6 +13,8 @@ import os
 import logging
 
 from app.routes import lead, auth
+from app.routes.dashboard import router as dashboard_router
+
 
 # =======================
 # Load Environment Variables
@@ -116,3 +118,4 @@ def custom_openapi():
 
 # Attach the custom OpenAPI schema
 app.openapi = custom_openapi
+app.include_router(dashboard_router)

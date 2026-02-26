@@ -1,46 +1,89 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "../components/ui/Card1";
 import Button from "../components/ui/Button1";
 import Switch from "../components/ui/Switch1";
 import Input from "../components/ui/Input1";
 import { Label } from "../components/ui/Label1";
-import { useTheme } from "../context/ThemeContext"; 
+import { useTheme } from "../context/ThemeContext";
 import { Loader2 } from "lucide-react";
 
 export default function Settings() {
   const { darkMode, toggleDarkMode } = useTheme();
 
-  // Profile state
   const [profile, setProfile] = useState({
-    name: "John Doe",
-    email: "john@example.com",
+    name: "",
+    email: "",
     password: "",
   });
 
-  // Preferences state
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [inAppNotifications, setInAppNotifications] = useState(true);
-
   const [saving, setSaving] = useState(false);
+
+  // 🔥 Load Profile From Backend
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch("http://127.0.0.1:8000/auth/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        setProfile({
+          name: data.name || "",
+          email: data.email || "",
+          password: "",
+        });
+      } catch (error) {
+        console.error("Failed to load profile", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  const handleSave = () => {
-    setSaving(true);
-    setTimeout(() => {
+  // 🔥 Save Profile To Backend
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        "http://127.0.0.1:8000/auth/update-profile",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: profile.name,
+            password: profile.password,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      alert(data.message || "Profile updated successfully");
+
+      setProfile({ ...profile, password: "" });
+    } catch (error) {
+      console.error("Update failed", error);
+      alert("Failed to update profile");
+    } finally {
       setSaving(false);
-      alert("Settings saved successfully!");
-      console.log("Saved:", {
-        profile,
-        preferences: {
-          darkMode,
-          emailNotifications,
-          inAppNotifications,
-        },
-      });
-    }, 1000);
+    }
   };
 
   return (
@@ -61,15 +104,17 @@ export default function Settings() {
                 onChange={handleChange}
               />
             </div>
+
             <div>
               <Label>Email</Label>
               <Input
                 type="email"
                 name="email"
                 value={profile.email}
-                onChange={handleChange}
+                disabled   // 🔒 Email not editable
               />
             </div>
+
             <div>
               <Label>New Password</Label>
               <Input
@@ -80,10 +125,11 @@ export default function Settings() {
                 placeholder="••••••••"
               />
             </div>
+
             <Button onClick={handleSave} disabled={saving}>
-              {saving ? (
+              {saving && (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
+              )}
               Save Changes
             </Button>
           </div>
@@ -115,21 +161,6 @@ export default function Settings() {
               onCheckedChange={setInAppNotifications}
             />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Placeholder Section */}
-      <Card className="shadow-md">
-        <CardContent>
-          <h2 className="text-xl font-semibold mb-2">Integrations</h2>
-          <p className="text-gray-500">Coming soon...</p>
-        </CardContent>
-      </Card>
-
-      <Card className="shadow-md">
-        <CardContent>
-          <h2 className="text-xl font-semibold mb-2">Data Management</h2>
-          <p className="text-gray-500">Coming soon...</p>
         </CardContent>
       </Card>
     </div>

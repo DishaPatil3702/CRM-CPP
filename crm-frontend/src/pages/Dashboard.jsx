@@ -1,5 +1,9 @@
 // src/pages/Dashboard.jsx
 import { useTheme } from "../context/ThemeContext";
+import { useRef } from "react";
+import axios from "axios";
+import { API } from "../services/api";
+
 import { useState, useEffect } from "react";
 import NotificationDropdown from "../components/NotificationDropdown";
 import { 
@@ -13,12 +17,90 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [activities, setActivities] = useState([]);
+  const fileInputRef = useRef(null);
+
+// 🔼 IMPORT
+const handleImportClick = () => {
+  fileInputRef.current.click();
+};
+
+const handleFileUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const token = 
+    localStorage.getItem("access_token") || 
+    localStorage.getItem("token");
+
+    await axios.post(
+      "http://127.0.0.1:8000/leads/import",
+      formData,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        } 
+      }
+  );  
+
+  toast.success("Data imported successfully");
+} catch (err) {
+  toast.error("Import failed");
+}
+
+};
+
+// 🔽 EXPORT
+const handleExport = async () => {
+  try {
+    const token =
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Not logged in");
+      return;
+    }
+
+    const res = await axios.get(
+      "http://127.0.0.1:8000/leads/export",
+      {
+        responseType: "blob",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const blob = new Blob([res.data], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "leads.csv";
+    link.click();
+
+    toast.success("Export successful");
+  } catch (err) {
+    console.error(err);
+    toast.error("Export failed");
+  }
+};
+
 
   // Enhanced stats with more detailed data and better colors
-  const stats = [
+  const dashboardStats = [
     { 
       title: "Total Revenue", 
-      value: "$2,435,890", 
+      //value: "$2,435,890", 
+      value: stats ? `$${stats.total_revenue}` : "$0",
+
       change: "+12.5%", 
       icon: DollarSign, 
       trend: "up", 
@@ -29,7 +111,9 @@ export default function Dashboard() {
     },
     { 
       title: "Active Leads", 
-      value: "1,247", 
+      //value: "1,247", 
+      value: stats ? stats.active_leads : "0",
+
       change: "+8.3%", 
       icon: Users, 
       trend: "up", 
@@ -40,7 +124,9 @@ export default function Dashboard() {
     },
     { 
       title: "Conversion Rate", 
-      value: "24.8%", 
+      //value: "24.8%", 
+      value: stats ? `${stats.conversion_rate}%` : "0%",
+
       change: "-2.1%", 
       icon: Target, 
       trend: "down", 
@@ -51,7 +137,9 @@ export default function Dashboard() {
     },
     { 
       title: "Deals Closed", 
-      value: "156", 
+      //value: "156", 
+      value: stats ? stats.closed_deals : "0",
+
       change: "+18.2%", 
       icon: CheckCircle, 
       trend: "up", 
@@ -62,13 +150,7 @@ export default function Dashboard() {
     }
   ];
 
-  const activities = [
-    { id: 1, type: "call", description: "Called John Anderson about Q4 proposal", time: "2 hours ago", status: "completed", priority: "high", avatar: "JA", amount: "$45K" },
-    { id: 2, type: "email", description: "Sent pricing details to Sarah Williams", time: "4 hours ago", status: "completed", priority: "medium", avatar: "SW", amount: "$25K" },
-    { id: 3, type: "meeting", description: "Product demo with Emily Chen", time: "Tomorrow 2:00 PM", status: "scheduled", priority: "high", avatar: "EC", amount: "$30K" },
-    { id: 4, type: "follow-up", description: "Follow up with Mike Johnson on contract", time: "Today 5:00 PM", status: "pending", priority: "medium", avatar: "MJ", amount: "$18K" },
-    { id: 5, type: "call", description: "Initial call with Lisa Parker", time: "30 minutes ago", status: "completed", priority: "low", avatar: "LP", amount: "$12K" }
-  ];
+  
 
   const getActivityIcon = (type) => {
     const icons = {
@@ -94,6 +176,53 @@ export default function Dashboard() {
       setLoading(false);
     }, 1000);
   }, []);
+  useEffect(() => {
+  fetchStats();
+  fetchActivities();
+}, []);
+
+const fetchStats = async () => {
+  try {
+    const token =
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("token");
+
+    const res = await axios.get(
+      "http://127.0.0.1:8000/dashboard/stats",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setStats(res.data);
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to load dashboard stats");
+  }
+};
+
+const fetchActivities = async () => {
+  try {
+    const token =
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("token");
+
+    const res = await axios.get(
+      "http://127.0.0.1:8000/dashboard/activities",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setActivities(res.data);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   if (loading) {
     return (
@@ -124,7 +253,9 @@ export default function Dashboard() {
     <div className="p-8 space-y-8">
       {/* Enhanced Stats Cards with Better Gradients */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
+        {dashboardStats.map((stat, index) => (
+
+        
           <div key={index} className={`${isDark ? 'bg-gray-800/70 border-gray-700/50' : 'bg-white/70 border-white/50'} rounded-3xl p-6 backdrop-blur-xl border hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group relative overflow-hidden`}>
             <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}></div>
             <div className="relative">
@@ -162,8 +293,9 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {[
             { icon: Plus, label: "Add Lead", color: "from-blue-500 to-blue-600", onClick: () => toast("Navigate to Leads page to add leads") },
-            { icon: Upload, label: "Import Data", color: "from-green-500 to-green-600", onClick: () => toast("Import feature coming soon") },
-            { icon: Download, label: "Export Report", color: "from-purple-500 to-purple-600", onClick: () => toast("Export feature coming soon") },
+            { icon: Upload, label: "Import Data", color: "from-green-500 to-green-600", onClick: handleImportClick },
+            { icon: Download, label: "Export Report", color: "from-purple-500 to-purple-600", onClick: handleExport },
+
             { icon: FileText, label: "Generate Report", color: "from-orange-500 to-orange-600", onClick: () => toast("Report generation coming soon") },
             { icon: MessageSquare, label: "Send Campaign", color: "from-pink-500 to-pink-600", onClick: () => toast("Campaign feature coming soon") },
             { icon: RefreshCw, label: "Sync Data", color: "from-indigo-500 to-indigo-600", onClick: () => toast("Data sync coming soon") }
@@ -180,6 +312,14 @@ export default function Dashboard() {
             </button>
           ))}
         </div>
+        <input
+          type="file"
+          ref={fileInputRef}
+          hidden
+          accept=".csv,.xlsx"
+          onChange={handleFileUpload}
+        />
+
       </div>
 
             {/* Main Content Grid */}
@@ -201,23 +341,31 @@ export default function Dashboard() {
 
             {/* ✅ Activities list was missing */}
             <div className="space-y-4">
-              {activities.map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-700/40">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getPriorityColor(activity.priority)}`}>
-                      {(() => {
-                        const Icon = getActivityIcon(activity.type);
-                        return <Icon className="w-5 h-5" />;
-                      })()}
+               {activities.length === 0 ? (
+                <p className="text-gray-500">No recent activities</p>
+               ) : (
+                  activities.map((activity, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-700/40"
+                    >
+                       <div>
+                          <p className={`${isDark ? 'text-gray-200' : 'text-gray-800'} font-medium`}>
+                             {activity.message}
+                         </p>
+                       <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(activity.created_at).toLocaleString()}
+                       </p>
                     </div>
-                    <div>
-                      <p className={`${isDark ? 'text-gray-200' : 'text-gray-800'} font-medium`}>{activity.description}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{activity.time}</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-semibold">{activity.amount}</span>
+
+                   {activity.amount && (
+                      <span className="text-sm font-semibold">
+                         ₹{activity.amount}
+                      </span>
+                   )}
                 </div>
-              ))}
+               ))
+             )}
             </div>
           </div>
         </div>

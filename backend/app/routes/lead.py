@@ -1,6 +1,10 @@
 # app/routes/lead.py
 from fastapi import APIRouter, Depends, HTTPException, Query, Body, status
+from fastapi.responses import StreamingResponse
 
+from fastapi import UploadFile, File
+import csv
+import io
 
 from typing import List, Optional
 from datetime import date, datetime
@@ -65,19 +69,99 @@ def create_lead(lead: LeadCreate, current_user: dict = Depends(get_current_user)
 
     if isinstance(lead_data.get("created"), (date, datetime)):
         lead_data["created"] = lead_data["created"].isoformat()
-
+    
     try:
         result = supabase.table("leads").insert(lead_data).execute()
         new_lead = result.data[0]
-        return {"message": "Lead created successfully", "lead": new_lead}  # ✅ wrapped response
+    
+
+    # 🔹 Log Activity
+        supabase.table("activities").insert({
+          "user_email": current_user["email"],
+          "type": "lead_created",
+          "message": f"New lead created: {new_lead.get('first_name')} {new_lead.get('last_name')}",
+          "created_at": datetime.utcnow().isoformat()
+        }).execute()
+
+        return {"message": "Lead created successfully", "lead": new_lead}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create lead: {str(e)}")
+        
+# ----------------------------
+# Export Report (CSV)
+# ----------------------------
+@router.get("/export")
+def export_leads(current_user: dict = Depends(get_current_user)):
+    try:
+        result = (
+            supabase
+            .table("leads")
+            .select("*")
+            .eq("owner_email", current_user["email"])
+            .execute()
+        )
 
+        leads = result.data or []
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+
+        # CSV header
+        writer.writerow([
+            "first_name",
+            "last_name",
+            "email",
+            "company",
+            "phone",
+            "source",
+            "status",
+            "notes",
+            "owner_email",
+            "created"
+        ])
+
+        for lead in leads:
+            writer.writerow([
+                lead.get("first_name"),
+                lead.get("last_name"),
+                lead.get("email"),
+                lead.get("company"),
+                lead.get("phone"),
+                lead.get("source"),
+                lead.get("status"),
+                lead.get("notes"),
+                lead.get("owner_email"),
+                lead.get("created"),
+            ])
+
+        output.seek(0)
+
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": "attachment; filename=leads.csv"
+            }
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+# ----------------------------
+# Update Lead
+# ----------------------------
+# ----------------------------
+# Update Lead
+# ----------------------------
 # ----------------------------
 # Update Lead
 # ----------------------------
 @router.put("/{lead_id}", response_model=Lead)
-def update_lead(lead_id: int, lead: dict = Body(...), current_user: dict = Depends(get_current_user)):
+def update_lead(
+    lead_id: int,
+    lead: dict = Body(...),
+    current_user: dict = Depends(get_current_user)
+):
     try:
         lead_data = {k: v for k, v in lead.items() if v is not None}
         if not lead_data:
@@ -97,28 +181,49 @@ def update_lead(lead_id: int, lead: dict = Body(...), current_user: dict = Depen
         if not result.data:
             raise HTTPException(status_code=404, detail="Lead not found or not owned by current user")
 
-        lead_response = result.data[0]
-        return lead_response
+        updated_lead = result.data[0]
+
+        # Log activity
+        supabase.table("activities").insert({
+            "user_email": current_user["email"],
+            "type": "lead_updated",
+            "message": f"Lead updated: {updated_lead.get('first_name')} {updated_lead.get('last_name')}",
+            "created_at": datetime.utcnow().isoformat()
+        }).execute()
+
+        return updated_lead
+
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error updating lead: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error updating lead: {str(e)}") 
+    # ----------------------------
+# Import Leads (CSV)
+# ----------------------------
+@router.post("/import")
+async def import_leads(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    import csv, io
 
-# ----------------------------
-# Delete Lead
-# ----------------------------
-@router.delete("/{lead_id}")
-def delete_lead(lead_id: int, current_user: dict = Depends(get_current_user)):
-    existing = supabase.table("leads").select("*").eq("id", lead_id).execute()
-    if not existing.data:
-        raise HTTPException(status_code=404, detail="Lead not found")
-    
-    user_role = current_user.get("role", "Sales")
-    if user_role != "Admin" and existing.data[0]["owner_email"] != current_user["email"]:
-        raise HTTPException(status_code=403, detail="Not authorized to delete this lead")
-    
-    try:
-        supabase.table("leads").delete().eq("id", lead_id).execute()
-        return {"message": "Lead deleted successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete lead: {str(e)}")
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only CSV files allowed")
+
+    content = await file.read()
+    reader = csv.DictReader(io.StringIO(content.decode("utf-8")))
+
+    rows = []
+    for row in reader:
+        row["owner_email"] = current_user["email"]
+        rows.append(row)
+
+    if not rows:
+        raise HTTPException(status_code=400, detail="CSV file is empty")
+
+    supabase.table("leads").insert(rows).execute()
+
+    return {
+        "message": "Leads imported successfully",
+        "count": len(rows)
+    }
