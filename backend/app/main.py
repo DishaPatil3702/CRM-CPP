@@ -20,8 +20,9 @@ from app.routes.dashboard import router as dashboard_router
 # Load Environment Variables
 # =======================
 load_dotenv()
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback_secret")
-
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY not found in environment variables")
 # =======================
 # Logging Configuration
 # =======================
@@ -48,12 +49,7 @@ app.add_middleware(
 def root():
     return {"message": "Welcome to the CRM Backend!"}
 
-# ✅ include once
-app.include_router(auth.router)
-app.include_router(lead.router)
-app.include_router(contact.router) 
-app.include_router(deals.router)
-app.include_router(reports.router)
+
 # =======================
 # OAuth2 Security Scheme
 # =======================
@@ -77,11 +73,17 @@ def read_root():
  #       logger.error(f"❌ Exception occurred: {e}", exc_info=True)
   #      return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
+
 # =======================
 # Include API Routes
 # =======================
 app.include_router(auth.router)
 app.include_router(lead.router)
+app.include_router(contact.router)
+app.include_router(deals.router)
+app.include_router(reports.router)
+app.include_router(dashboard_router)
+
 
 # =======================
 # Custom OpenAPI (Swagger Security)
@@ -118,4 +120,4 @@ def custom_openapi():
 
 # Attach the custom OpenAPI schema
 app.openapi = custom_openapi
-app.include_router(dashboard_router)
+

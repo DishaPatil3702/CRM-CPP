@@ -47,11 +47,13 @@ def login(email: str = Form(...), password: str = Form(...)):
         if not bcrypt.checkpw(password.encode("utf-8"), user_data["password"].encode("utf-8")):
             raise HTTPException(status_code=400, detail="Invalid email or password")
 
+        
         token = create_access_token({
-            "sub": user_data["email"],
-            "role": user_data["role"]
+             "sub": user_data["email"],
+             "role": user_data["role"],
+             "name": user_data.get("name"),
+             "profile_pic": user_data.get("profile_pic")
         })
-
         return {
             "access_token": token,
             "token_type": "bearer",
@@ -75,7 +77,13 @@ def get_me(authorization: str = Header(...)):
         if payload is None:
             raise HTTPException(status_code=401, detail="Invalid or expired token")
 
-        return {"email": payload.get("sub")}
+       
+        return {
+                "email": payload.get("sub"),
+                "role": payload.get("role"),
+                "name": payload.get("name"),
+                "profile_pic": payload.get("profile_pic")
+                }
 
     except Exception as e:
         print("❌ Token Error:", e)
@@ -84,9 +92,14 @@ def get_me(authorization: str = Header(...)):
 
 # ✅ Function for dependency injection in other routes
 def get_current_user(token: str = Depends(oauth2_scheme)):
+    print("🔎 Incoming Token:", token)
+
     payload = verify_token(token)
+
     if payload is None:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    print("✅ Token Payload:", payload)
 
     return {
         "email": payload.get("sub"),

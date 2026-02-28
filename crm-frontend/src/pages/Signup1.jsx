@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Shield, Zap, BarChart3 } from "lucide-react";
-
+import React from "react";
 export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -81,7 +81,8 @@ export default function Signup() {
                 style={{ animation: `slideInLeft 0.8s ease-out ${index * 0.2}s both` }}
               >
                 <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl group-hover:shadow-purple-500/25`}>
-                  <feature.icon className="w-7 h-7 text-white" />
+                  
+                  {React.createElement(feature.icon, { className: "w-7 h-7 text-white" })}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300 mb-2">

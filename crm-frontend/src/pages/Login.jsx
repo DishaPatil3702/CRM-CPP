@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Shield, Zap, BarChart3, ArrowLeft, Check, AlertCircle, Loader } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-
+import React from "react";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -60,6 +60,7 @@ const handleSubmit = async (e) => {
     setIsLoading(false);
   }
 };
+  
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setForgotLoading(true);
@@ -232,7 +233,8 @@ const handleSubmit = async (e) => {
                 style={{ animation: `slideInLeft 0.8s ease-out ${index * 0.2}s both` }}
               >
                 <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl group-hover:shadow-purple-500/25`}>
-                  <feature.icon className="w-7 h-7 text-white" />
+                 
+                  {React.createElement(feature.icon, { className: "w-7 h-7 text-white" })}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300 mb-2">

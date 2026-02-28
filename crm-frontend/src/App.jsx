@@ -1,7 +1,8 @@
 // App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Login from "./pages/Login";
+//import Login from "./pages/Login";
+import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup1";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";

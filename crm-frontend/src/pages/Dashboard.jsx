@@ -6,6 +6,7 @@ import { API } from "../services/api";
 import formatINR from "../utils/formatCurrency";
 import { useState, useEffect } from "react";
 import NotificationDropdown from "../components/NotificationDropdown";
+import { useAuth } from "../context/AuthContext";
 import { 
   BarChart3, Users, DollarSign, TrendingUp, Phone, Mail, Calendar, 
   Plus, CheckCircle, Target, Clock, ArrowUpRight, ArrowDownRight,
@@ -15,12 +16,13 @@ import toast from "react-hot-toast";
 
 export default function Dashboard() {
   const { theme } = useTheme();
+  const { token } = useAuth(); 
   const isDark = theme === "dark";
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [activities, setActivities] = useState([]);
   const fileInputRef = useRef(null);
-
+  
 // 🔼 IMPORT
 const handleImportClick = () => {
   fileInputRef.current.click();
@@ -34,9 +36,9 @@ const handleFileUpload = async (e) => {
   formData.append("file", file);
 
   try {
-    const token = 
+    //const token = 
    // localStorage.getItem("access_token") || 
-    localStorage.getItem("token");
+    //localStorage.getItem("token");
 
     await axios.post(
       "http://127.0.0.1:8000/leads/import",
@@ -59,9 +61,9 @@ const handleFileUpload = async (e) => {
 // 🔽 EXPORT
 const handleExport = async () => {
   try {
-    const token =
+   // const token =
       //localStorage.getItem("access_token") ||
-      localStorage.getItem("token");
+      //localStorage.getItem("token");
 
     if (!token) {
       toast.error("Not logged in");
@@ -182,9 +184,9 @@ const handleExport = async () => {
 
 const fetchStats = async () => {
   try {
-    const token =
+    //const token =
       //localStorage.getItem("access_token") ||
-      localStorage.getItem("token");
+      //localStorage.getItem("token");
 
     const res = await axios.get(
       "http://127.0.0.1:8000/dashboard/stats",
@@ -204,9 +206,9 @@ const fetchStats = async () => {
 
 const fetchActivities = async () => {
   try {
-    const token =
+    //const token =
       //localStorage.getItem("access_token") ||
-      localStorage.getItem("token");
+      //localStorage.getItem("token");
 
     const res = await axios.get(
       "http://127.0.0.1:8000/dashboard/activities",
@@ -247,6 +249,68 @@ const fetchActivities = async () => {
       </div>
     );
   }
+  const handleGenerateReport = async () => {
+  try {
+    //const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      "http://127.0.0.1:8000/dashboard/generate-report",
+      {
+        responseType: "blob",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "report.pdf";
+    link.click();
+  } catch (err) {
+    toast.error("Report failed");
+  }
+};
+const handleSendCampaign = async () => {
+  try {
+    //const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+  "http://127.0.0.1:8000/dashboard/send-campaign",
+  {
+    title: "Summer Offer Campaign",
+    description: "50% discount for premium customers"
+  },
+  {
+    headers: { 
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}` 
+    },
+  }
+);
+
+    toast.success(res.data.message);
+  } catch (err) {
+    toast.error("Campaign failed");
+  }
+};
+
+const handleSyncData = async () => {
+  try {
+   // const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      "http://127.0.0.1:8000/dashboard/sync-data",
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    toast.success(res.data.message);
+  } catch (err) {
+    toast.error("Sync failed");
+  }
+};
 
   return (
     <div className="p-8 space-y-8">
@@ -294,10 +358,9 @@ const fetchActivities = async () => {
             { icon: Plus, label: "Add Lead", color: "from-blue-500 to-blue-600", onClick: () => toast("Navigate to Leads page to add leads") },
             { icon: Upload, label: "Import Data", color: "from-green-500 to-green-600", onClick: handleImportClick },
             { icon: Download, label: "Export Report", color: "from-purple-500 to-purple-600", onClick: handleExport },
-
-            { icon: FileText, label: "Generate Report", color: "from-orange-500 to-orange-600", onClick: () => toast("Report generation coming soon") },
-            { icon: MessageSquare, label: "Send Campaign", color: "from-pink-500 to-pink-600", onClick: () => toast("Campaign feature coming soon") },
-            { icon: RefreshCw, label: "Sync Data", color: "from-indigo-500 to-indigo-600", onClick: () => toast("Data sync coming soon") }
+            { icon: FileText, label: "Generate Report", color: "from-orange-500 to-orange-600", onClick: handleGenerateReport },
+            { icon: MessageSquare, label: "Send Campaign", color: "from-pink-500 to-pink-600", onClick: handleSendCampaign },
+            { icon: RefreshCw, label: "Sync Data", color: "from-indigo-500 to-indigo-600", onClick: handleSyncData }
           ].map((action, index) => (
             <button
               key={index}

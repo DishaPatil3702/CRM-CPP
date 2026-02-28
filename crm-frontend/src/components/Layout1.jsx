@@ -14,7 +14,8 @@ import {
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { logout } = useAuth();
+  
+  const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const isDark = theme === "dark";
@@ -28,8 +29,7 @@ export default function Layout({ children }) {
     { name: "Settings", href: "/settings", icon: Settings },
   ];
 
-  const user = { email: "demo@crmpro.com", name: "Disha" };
-
+  
   return (
     <div className={`min-h-screen transition-all duration-500 ${isDark ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`}>
       {/* Mobile sidebar */}
@@ -44,13 +44,13 @@ export default function Layout({ children }) {
               <X className="h-6 w-6 text-white" />
             </button>
           </div>
-          <SidebarContent navigation={navigation} isDark={isDark} />
+            <SidebarContent navigation={navigation} isDark={isDark} user={user} />
         </div>
       </div>
 
       {/* Desktop sidebar */}
       <div className={`hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-xl border-r ${isDark ? 'border-gray-700' : 'border-gray-200'} shadow-2xl z-30`}>
-        <SidebarContent navigation={navigation} isDark={isDark} />
+         <SidebarContent navigation={navigation} isDark={isDark} user={user} />
       </div>
 
       {/* Main content */}
@@ -72,7 +72,7 @@ export default function Layout({ children }) {
                 </div>
                 <div>
                   <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-800'} tracking-tight`}>CRMPro</h1>
-                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Welcome, {user.name}</p>
+                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Welcome, {user?.name || "User"}</p>
                 </div>
               </div>
             </div>
@@ -118,7 +118,10 @@ export default function Layout({ children }) {
               {/* User / Logout */}
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center font-bold text-white shadow-xl text-xs">
-                  {user.name.split(' ').map(n => n[0]).join('')}
+                  
+                  {user?.name
+                      ? user.name.split(" ").map(n => n[0]).join("")
+                      : "U"}
                 </div>
                 
                 <button 
@@ -142,7 +145,7 @@ export default function Layout({ children }) {
   );
 }
 
-function SidebarContent({ navigation, isDark }) {
+function SidebarContent({ navigation, isDark, user }) {
   const location = useLocation();
 
   return (
@@ -194,10 +197,13 @@ function SidebarContent({ navigation, isDark }) {
       <div className={`flex-shrink-0 p-4 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
         <div className={`flex items-center p-3 rounded-xl ${isDark ? 'bg-gray-700/50' : 'bg-gray-100/50'}`}>
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center font-bold text-white shadow-xl text-sm">
-            DS
+            
+            {user?.name
+              ? user.name.split(" ").map(n => n[0]).join("")
+              : "U"}
           </div>
           <div className="ml-3 flex-1">
-            <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-800'}`}>Disha</p>
+            <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-800'}`}>{user?.name || "User"}</p>
             <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Premium Plan</p>
           </div>
         </div>

@@ -53,3 +53,52 @@ async def conversion_rate():
         "won_deals": won_deals_count,
         "conversion_rate": (won_deals_count / leads_count * 100) if leads_count else 0
     }
+from fastapi.responses import FileResponse
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+import os
+
+
+@router.get("/generate-report")
+async def generate_report():
+
+    file_path = "crm_report.pdf"
+
+    doc = SimpleDocTemplate(file_path)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    # ✅ LOGO (Correct Path)
+    logo_path = os.path.join(os.getcwd(), "app", "static", "logo.png")
+
+    print("Logo path:", logo_path)
+    print("Logo exists:", os.path.exists(logo_path))
+
+    if os.path.exists(logo_path):
+        logo = Image(logo_path, width=150, height=80)
+        logo.hAlign = "CENTER"
+        elements.append(logo)
+        elements.append(Spacer(1, 20))
+
+    # ✅ TITLE
+    elements.append(Paragraph("CRM Dashboard Report", styles["Title"]))
+    elements.append(Spacer(1, 20))
+
+    # ✅ SAMPLE DATA (Replace with your real data if needed)
+    elements.append(Paragraph("Total Leads: 60", styles["Normal"]))
+    elements.append(Paragraph("Total Deals: 19", styles["Normal"]))
+    elements.append(Paragraph("Closed Deals: 14", styles["Normal"]))
+    elements.append(Paragraph("Total Revenue: Rs 11,029,250.00", styles["Normal"]))
+    elements.append(Paragraph("Conversion Rate: 23.33%", styles["Normal"]))
+
+    # ✅ PAGE BORDER FUNCTION
+    def add_border(canvas, doc):
+        canvas.saveState()
+        canvas.setStrokeColor(colors.black)
+        canvas.rect(20, 20, 550, 800)
+        canvas.restoreState()
+
+    doc.build(elements, onFirstPage=add_border, onLaterPages=add_border)
+
+    return FileResponse(file_path, media_type="application/pdf", filename="crm_report.pdf")
