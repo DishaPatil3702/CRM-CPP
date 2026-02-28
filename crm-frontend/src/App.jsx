@@ -18,7 +18,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 import "./App.css";
-
+import SplashScreen from "./components/SplashScreen"; 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
@@ -39,15 +39,10 @@ export default function App() {
 
     initializeApp();
   }, []);
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-xl font-bold">
-        Loading...
-      </div>
-    );
+    return <SplashScreen onComplete={() => setIsLoading(false)} />;  // ← changed
   }
-
+  
   return (
     <ErrorBoundary>
       <ThemeProvider>

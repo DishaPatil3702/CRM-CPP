@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#6366f1" flood-opacity="0.5"/>
+    </filter>
+    <radialGradient id="dotGrad" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#c4b5fd"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Dark background -->
+  <rect width="400" height="120" rx="16" fill="#0a0d14"/>
+
+  <!-- Subtle background glow -->
+  <ellipse cx="60" cy="60" rx="70" ry="60" fill="#6366f1" opacity="0.06"/>
+
+  <!-- Icon mark -->
+  <g transform="translate(20, 20)" filter="url(#shadow)">
+    <rect width="80" height="80" rx="20" fill="url(#iconGrad)"/>
+    <rect width="80" height="80" rx="20" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+    <rect x="12" y="50" width="11" height="20" rx="3" fill="rgba(255,255,255,0.40)"/>
+    <rect x="27" y="38" width="11" height="32" rx="3" fill="rgba(255,255,255,0.60)"/>
+    <rect x="42" y="26" width="11" height="44" rx="3" fill="rgba(255,255,255,0.82)"/>
+    <rect x="57" y="14" width="11" height="56" rx="3" fill="white"/>
+    <polyline points="17,52 33,40 47,28 62,16"
+      fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3,3"/>
+    <circle cx="62" cy="16" r="4.5" fill="url(#dotGrad)" filter="url(#glow)"/>
+  </g>
+
+  <!-- CRM text -->
+  <text x="120" y="68"
+    font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+    font-size="42" font-weight="800" letter-spacing="-1"
+    fill="#f0f4ff">CRM</text>
+
+  <!-- Pro in accent -->
+  <text x="231" y="68"
+    font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+    font-size="42" font-weight="800" letter-spacing="-1"
+    fill="#a78bfa">Pro</text>
+
+  <!-- Tagline -->
+  <text x="121" y="88"
+    font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+    font-size="11.5" font-weight="500" letter-spacing="3.5"
+    fill="#4a5570">ENTERPRISE SALES PLATFORM</text>
+
+  <!-- Accent underline -->
+  <rect x="121" y="93" width="48" height="2" rx="1" fill="url(#iconGrad)" opacity="0.6"/>
+</svg>

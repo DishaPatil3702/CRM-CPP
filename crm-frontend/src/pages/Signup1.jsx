@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Shield, Zap, BarChart3 } from "lucide-react";
 import React from "react";
+import CRMProLogo from "../components/CRMProLogo";
+
 export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -62,12 +64,15 @@ export default function Signup() {
         
         <div className="relative z-10 flex flex-col justify-center px-12 py-24">
           <div className="mb-16">
-            <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
+            <div className="mb-6">
+              <CRMProLogo size={80} showText={true} showTag={true} />
+            </div>
+            {/*<h1 className="text-5xl font-bold text-white mb-6 leading-tight">
               Join{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-gradient">
                 CRMPro
               </span>
-            </h1>
+            </h1>*/}
             <p className="text-xl text-gray-300 leading-relaxed max-w-lg">
               Start your journey with the most advanced Customer Relationship Management platform trusted by thousands of businesses worldwide
             </p>
@@ -111,9 +116,12 @@ export default function Signup() {
             style={{ animation: 'slideInRight 0.8s ease-out' }}
           >
             <div className="text-center mb-10">
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl mx-auto mb-6 flex items-center justify-center transform transition-transform duration-300 hover:scale-110 shadow-lg shadow-purple-500/25">
-                <User className="w-10 h-10 text-white" />
+              <div className="flex justify-center mb-6">
+                <CRMProLogo size={80} showText={true} />
               </div>
+              {/*<div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl mx-auto mb-6 flex items-center justify-center transform transition-transform duration-300 hover:scale-110 shadow-lg shadow-purple-500/25">
+                <User className="w-10 h-10 text-white" />
+              </div>*/}
               <h2 className="text-3xl font-bold text-white mb-3">Create Account</h2>
               <p className="text-gray-300 leading-relaxed">Join thousands of businesses growing with CRMPro</p>
             </div>

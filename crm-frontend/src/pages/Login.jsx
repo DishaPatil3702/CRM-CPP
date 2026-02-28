@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Shield, Zap, BarChart3, ArrowLeft, Check, AlertCircle, Loader } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import React from "react";
+import CRMProLogo from "../components/CRMProLogo";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,8 +50,8 @@ const handleSubmit = async (e) => {
     }
 
     const data = await res.json();
-    login(data.access_token);
-    localStorage.setItem("token", data.access_token);
+   login(data.access_token);
+    //localStorage.setItem("token", data.access_token);
 
     setSuccess("✅ Login successful! Redirecting...");
     setTimeout(() => navigate("/dashboard"), 1500);
@@ -123,9 +124,8 @@ const handleSubmit = async (e) => {
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
-
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl mx-auto mb-6 flex items-center justify-center transform transition-transform duration-300 hover:scale-110">
-                <Mail className="w-10 h-10 text-white" />
+              <div className="flex justify-center mb-6">
+                  <CRMProLogo size={72} showText={false} />
               </div>
               <h2 className="text-3xl font-bold text-white mb-3">Reset Password</h2>
               <p className="text-gray-300 leading-relaxed">Enter your email address and we'll send you a link to reset your password.</p>
@@ -263,9 +263,10 @@ const handleSubmit = async (e) => {
             style={{ animation: 'slideInRight 0.8s ease-out' }}
           >
             <div className="text-center mb-10">
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl mx-auto mb-6 flex items-center justify-center transform transition-transform duration-300 hover:scale-110 shadow-lg shadow-purple-500/25">
-                <BarChart3 className="w-10 h-10 text-white" />
+              <div className="flex justify-center mb-6">
+                <CRMProLogo size={80} showText={true} />
               </div>
+              
               <h2 className="text-3xl font-bold text-white mb-3">Welcome Back</h2>
               <p className="text-gray-300 leading-relaxed">Sign in to access your CRM dashboard</p>
             </div>
