@@ -67,8 +67,12 @@ export default function Layout({ children }) {
               </button>
               
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-xl">
-                  <BarChart3 className="w-5 h-5 text-white" />
+                <div className="flex items-center">
+                  <img 
+                    src="/crmpro-icon.svg" 
+                    alt="CRMPro Logo" 
+                    className="h-8 w-auto"
+                  />
                 </div>
                 <div>
                   <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-800'} tracking-tight`}>CRMPro</h1>
@@ -153,10 +157,15 @@ function SidebarContent({ navigation, isDark, user }) {
       {/* Logo */}
       <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-xl">
-            <BarChart3 className="w-5 h-5 text-white" />
+          <div className="flex items-center">
+             <img 
+              src="/crmpro-icon.svg" 
+              alt="CRMPro Logo" 
+              className="h-8 w-auto"
+             />
           </div>
           <div>
+            
             <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>CRMPro</h1>
             <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Professional</p>
           </div>
